@@ -8,4 +8,4 @@
 
 ## AUTHOR
 
-大久保 正彦 (Masahiko OHKUBO) <masahiko.ohkubo@gmail.com> <https://twitter.com/mah_jp>
+大久保 正彦 (Masahiko OHKUBO)
