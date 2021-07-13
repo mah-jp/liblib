@@ -89,6 +89,7 @@ def main():
 #if __name__ == '__main__':
 try:
 
+	args = sys.argv
 	if not(os.environ.get('LIBLIB_USERNAME') and os.environ.get('LIBLIB_PASSWORD')):
 		print(('Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar; %s ID ...' % args[0]), file=sys.stderr)
 		sys.exit(1)
