@@ -24,8 +24,8 @@ function func_main () {
 	fi
 }
 
-export LIBLIB_USERNAME=''
-export LIBLIB_PASSWORD=''
+export LIBLIB_USERNAME='★★'
+export LIBLIB_PASSWORD='☆☆'
 func_main
 
 # clear
