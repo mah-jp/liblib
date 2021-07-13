@@ -2,7 +2,7 @@
 
 # Usage: $0
 
-PATH_ME=$(dirname $(readlink -f $0)) # Linuxなど (maxOSではだめね)
+PATH_ME=$(dirname $(readlink -f $0)) # Linuxなど (macOSでは使えない方法)
 CMD_LIBLIB="${PATH_ME}/book2json.py"
 CMD_ALERT="${PATH_ME}/json2alert.py"
 CMD_VOICE2GH="${PATH_ME}/../voice2googlehome/voice2gh.sh"
