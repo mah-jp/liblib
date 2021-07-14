@@ -19,7 +19,7 @@
 	```
 	$ export LIBLIB_USERNAME='★★'
 	$ export LIBLIB_PASSWORD='☆☆'
-	$ ./bookcheck.sh | jq
+	$ ./book2json.py | jq
 	[
 	{
 		"datetime": "2021-07-14T01:11:57.521594+09:00",
@@ -64,7 +64,7 @@
 	```
 	$ export LIBLIB_USERNAME='★★'
 	$ export LIBLIB_PASSWORD='☆☆'
-	$ ./bookcheck.sh | ./json2alert.py 
+	$ ./book2json.py | ./json2alert.py 
 	図書館の次の本、2冊が返却期限です！ 1冊目、『●●』。2冊目、『■■』。以上です。
 	```
 
