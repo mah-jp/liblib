@@ -27,7 +27,3 @@ function func_main () {
 export LIBLIB_USERNAME='★★'
 export LIBLIB_PASSWORD='☆☆'
 func_main
-
-# clear
-export -n LIBLIB_USERNAME
-export -n LIBLIB_PASSWORD
