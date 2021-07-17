@@ -65,7 +65,7 @@
 2. `book2json_d-library.py`を実行すると、神戸市電子図書館で借りている本 (資料) の冊数分の情報がJSON形式で標準出力されます (JSONの構造は`book2json_opac.py`と共通)
 	```
 	$ export LIBLIB_USERNAME='★★'
-	$ export LIBLIB_PASSWORD='☆☆'
+	$ export LIBLIB_PASSWORD='▲▲'
 	$ ./book2json_d-library.py | jq
 	{
 		"datetime": "2021-07-18T03:09:48.350860+09:00",
@@ -108,6 +108,9 @@
 	$ export LIBLIB_PASSWORD='☆☆'
 	$ ./book2json_opac.py | ./json2alert.py '神戸市立図書館'
 	神戸市立図書館の次の本、2冊が返却期限です！ 1冊目、『●●』。2冊目、『■■』。以上です。
+
+	$ export LIBLIB_USERNAME='★★'
+	$ export LIBLIB_PASSWORD='▲▲'
 	$ ./book2json_d-library.py | ./json2alert.py '神戸市電子図書館'
 	神戸市電子図書館の次の本、1冊が返却期限です！ 1冊目、『●●』。以上です。
 	```

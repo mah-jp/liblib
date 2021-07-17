@@ -34,5 +34,5 @@ sleep 60
 
 # sample
 export LIBLIB_USERNAME='★★'
-export LIBLIB_PASSWORD='☆☆'
+export LIBLIB_PASSWORD='▲▲'
 func_main ${CMD_BOOK_2} '神戸市電子図書館'
