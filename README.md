@@ -16,7 +16,7 @@
 	|---|---|
 	|LIBLIB_USERNAME|図書館カード番号|
 	|LIBLIB_PASSWORD|パスワード|
-2. `book2json_opac.py`を実行すると、借りている本の冊数分の情報がJSON形式で標準出力されます (JSONの構造は`book2json_d-library.py`と共通)
+2. `book2json_opac.py`を実行すると、神戸市立図書館で借りている本の冊数分の情報がJSON形式で標準出力されます (JSONの構造は`book2json_d-library.py`と共通)
 	```
 	$ export LIBLIB_USERNAME='★★'
 	$ export LIBLIB_PASSWORD='☆☆'
@@ -62,7 +62,7 @@
 	|---|---|
 	|LIBLIB_USERNAME|利用者ID|
 	|LIBLIB_PASSWORD|パスワード|
-2. `book2json_d-library.py`を実行すると、借りている本 (資料) の冊数分の情報がJSON形式で標準出力されます (JSONの構造は`book2json_opac.py`と共通)
+2. `book2json_d-library.py`を実行すると、神戸市電子図書館で借りている本 (資料) の冊数分の情報がJSON形式で標準出力されます (JSONの構造は`book2json_opac.py`と共通)
 	```
 	$ export LIBLIB_USERNAME='★★'
 	$ export LIBLIB_PASSWORD='☆☆'
