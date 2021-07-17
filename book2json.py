@@ -16,7 +16,6 @@ from selenium.webdriver.common.by import By
 timeout = 30
 url_base = 'https://www.lib.city.kobe.jp'
 url_login = url_base + '/opac/opacs/mypage_display'
-url_list = url_base + '/opac/opacs/lending_display'
 
 def do_login(username, password):
 	driver.find_element_by_id('user_login').send_keys(username)
