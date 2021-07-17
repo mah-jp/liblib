@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# book2json.py for Kobe City Library (ver.20210713)
+# book2json.py for 神戸市立図書館 (ver.20210717)
 # Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 import datetime
