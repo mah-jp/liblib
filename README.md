@@ -50,7 +50,8 @@
 				"id": "2",
 				〜〜途中省略〜〜
 			}
-		]
+		],
+		"status": "success"
 	}
 	```
 
@@ -79,7 +80,6 @@
 				"button_lend": false
 			}
 		],
-		"status": "success",
 		"borrowing": [
 			{
 				"id": 1,
@@ -93,7 +93,8 @@
 				"id": 2,
 				〜〜途中省略〜〜
 			}
-		]
+		],
+		"status": "success"
 	}
 	```
 3. 上記JSONの「reservation」部分には、予約している資料の情報も含まれます (将来の拡張用)
