@@ -18,7 +18,7 @@ trap func_atexit EXIT
 trap 'rc=$?; trap - EXIT; func_atexit; exit $?' INT PIPE TERM
 
 function func_main () {
-	$1 $2 | jq . | tee >(${CMD_ALERT} > ${TMP_FILE})
+	$1 | jq . | tee >(${CMD_ALERT} $2 > ${TMP_FILE})
 	TMP_TEXT=`cat ${TMP_FILE}`
 	if [ -s ${TMP_FILE} ]; then
 		logger -t `basename "$0"` "${TMP_TEXT}"
