@@ -2,10 +2,12 @@
 
 図書館で借りた本の返却忘れを防ぐための、次のスクリプトのセットです。
 
-- `book2json_opac.py`: 神戸市立図書館で借りている本の情報をJSON化するPythonスクリプト
-- `book2json_d-library.py`: 神戸市電子図書館で借りている本 (資料) の情報をJSON化するPythonスクリプト
-- `json2alert.py`: 上記`book2json_*.py`が出力するJSONを読み込み、返却期限が近い本の書名を出力するPythonスクリプト
-- `bookcheck_sample.sh`: `book2json_*.py`と`json2alert.py`を組み合わせて起動するbashスクリプトのサンプル
+|スクリプト名|内容|
+|---|---|
+|`book2json_opac.py`|神戸市立図書館で借りている本の情報をJSON化するPythonスクリプト|
+|`book2json_d-library.py`|神戸市電子図書館で借りている本 (資料) の情報をJSON化するPythonスクリプト|
+|`json2alert.py`|`book2json_{opac,d-library}.py`が出力するJSONを読み込み、返却期限が近い本の書名を出力するPythonスクリプト|
+|`bookcheck_sample.sh`|`book2json_{opac,d-library}.py`と`json2alert.py`を組み合わせて起動するbashスクリプトのサンプル|
 
 ## 各スクリプトの使い方
 
