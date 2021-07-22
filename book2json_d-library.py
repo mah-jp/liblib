@@ -63,6 +63,8 @@ def main():
 			item['id'] = int(i + 1)
 			for j in range(len(dts)):
 				item[dts[j].text] = dds[j].text
+				if dts[j].text == '予約資料名':
+					item['name'] = dds[j].text
 			lend = r_lis[i].find_element_by_xpath('child::form/div/div/button[1]')
 			if lend.get_attribute('disabled'):
 				item['button_lend'] = False

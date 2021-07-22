@@ -30,7 +30,7 @@ function func_main () {
 export LIBLIB_USERNAME='★★'
 export LIBLIB_PASSWORD='☆☆'
 func_main ${CMD_BOOK_1} '神戸市立図書館'
-sleep 60
+sleep 45
 
 # sample
 export LIBLIB_USERNAME='★★'
