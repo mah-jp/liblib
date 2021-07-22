@@ -16,7 +16,7 @@ def main(facility):
 	counter_r = 0
 	text = ''
 	if data_json['status'] == 'success':
-		# 貸出チェック
+		# 借りている資料のチェック
 		if 'borrowing' in data_json:
 			data_borrowing = data_json['borrowing']
 			for i in range(len(data_borrowing)):
@@ -28,7 +28,7 @@ def main(facility):
 					text = text + ('%d冊目、『%s』。' % (counter_b, input['name']))
 			if counter_b > 0:
 				text = ('%s次の本、%d冊が返却期限です！ ' % (facility, counter_b)) + text
-		# 予約チェック
+		# 予約している資料のチェック
 		if 'reservation' in data_json:
 			data_reservation = data_json['reservation']
 			for i in range(len(data_reservation)):

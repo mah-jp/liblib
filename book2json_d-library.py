@@ -55,6 +55,7 @@ def main():
 	output['datetime'] = datetime.datetime.now().isoformat() + '+09:00'
 	output['url'] = url_check
 	if r_lis:
+		# 予約している資料
 		output['reservation'] = []
 		for i in range(len(r_lis)):
 			dts = r_lis[i].find_elements_by_tag_name('dt')
@@ -72,6 +73,7 @@ def main():
 				item['button_lend'] = True
 			output['reservation'].append(item)
 	if b_lis:
+		# 借りている資料
 		output['borrowing'] = []
 		for i in range(len(b_lis)):
 			dts = b_lis[i].find_elements_by_tag_name('dt')
