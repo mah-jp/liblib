@@ -6,7 +6,7 @@
 |---|---|
 |`book2json_opac.py`|神戸市立図書館で借りている本の情報をJSON化するPythonスクリプト|
 |`book2json_d-library.py`|神戸市電子図書館で借りている本と予約している本の情報をJSON化するPythonスクリプト|
-|`json2alert.py`|`book2json_{opac,d-library}.py`が出力するJSONを読み込み、返却期限が近い本と貸出可能な本の書名を出力するPythonスクリプト|
+|`json2alert.py`|`book2json_{opac,d-library}.py`が出力するJSONを読み込み、返却期限が近い本と貸出可能な予約本の書名を出力するPythonスクリプト|
 |`bookcheck_sample.sh`|`book2json_{opac,d-library}.py`と`json2alert.py`を組み合わせて起動するbashスクリプトのサンプル|
 
 ## 各スクリプトの使い方
@@ -116,7 +116,7 @@
 	$ ./book2json_d-library.py | ./json2alert.py '神戸市電子図書館'
 	神戸市電子図書館の次の本、1冊が返却期限です！ 1冊目、『●●』。以上です。
 	```
-3. 同様に、電子図書館で予約していて、貸出可能になっている本の書名がJSONから抽出され、音声アナウンス向けにまとめられたものが標準出力されます (実験中)
+3. 同様に、電子図書館で貸出可能になっている予約本の書名がJSONから抽出され、音声アナウンス向けにまとめられたものが標準出力されます (実験中)
 4. `json2alert.py`実行時に第1引数が指定されていると、それを図書館名とみなして、標準出力の冒頭に挿入するようにしています
 
 ### bookcheck_sample.sh
