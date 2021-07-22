@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# book2json_opac.py for 神戸市立図書館 (ver.20210718)
+# book2json_opac.py for 神戸市立図書館 (ver.20210722)
 # Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 import datetime
@@ -82,26 +82,22 @@ def main():
 	wait_element('XPATH', '//*[@id="footer"]') # footer
 	return
 
-#if __name__ == '__main__':
-try:
-
-	args = sys.argv
-	if not(os.environ.get('LIBLIB_USERNAME') and os.environ.get('LIBLIB_PASSWORD')):
-		print(('Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar; %s ID ...' % args[0]), file=sys.stderr)
-		sys.exit(1)
-	else:
-		username = os.environ.get('LIBLIB_USERNAME')
-		password = os.environ.get('LIBLIB_PASSWORD')
-		if len(username) * len(password) == 0:
-			print(('ERROR: LIBLIB_USERNAME and/or LIBLIB_PASSWORD is empty.' % args[0]), file=sys.stderr)
-			sys.exit(2)
-
-	options = webdriver.ChromeOptions()
-	options.add_argument('--headless')
-	driver = webdriver.Chrome(options=options)
-	main()
-	driver.quit()
-
-except KeyboardInterrupt:
-	driver.quit()
-	sys.exit()
+if __name__ == '__main__':
+	try:
+		args = sys.argv
+		if not(os.environ.get('LIBLIB_USERNAME') and os.environ.get('LIBLIB_PASSWORD')):
+			print(('Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar; %s ID ...' % args[0]), file=sys.stderr)
+			sys.exit(1)
+		else:
+			username = os.environ.get('LIBLIB_USERNAME')
+			password = os.environ.get('LIBLIB_PASSWORD')
+			if len(username) * len(password) == 0:
+				print(('ERROR: LIBLIB_USERNAME and/or LIBLIB_PASSWORD is empty.' % args[0]), file=sys.stderr)
+				sys.exit(2)
+		options = webdriver.ChromeOptions()
+		options.add_argument('--headless')
+		driver = webdriver.Chrome(options=options)
+		main()
+		driver.quit()
+	except:
+		driver.quit()

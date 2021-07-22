@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# json2alert.py (ver.20210718)
+# json2alert.py (ver.20210722)
 # Usage: cat BOOK.json | $0 [図書館名]
 
 import json
@@ -27,15 +27,15 @@ def main(facility):
 			text = ('%s次の本、%d冊が返却期限です！ ' % (facility, counter)) + text + '以上です。'
 	return(counter, text)
 
-args = sys.argv
-if len(args) > 1:
-	facility = args[1] + 'の'
-else:
-	facility = ''
-
-(counter, text) = main(facility)
-if counter > 0:
-	print(text)
-	sys.exit(0)
-else:
-	sys.exit(0)
+if __name__ == '__main__':
+	args = sys.argv
+	if len(args) > 1:
+		facility = args[1] + 'の'
+	else:
+		facility = ''
+	(counter, text) = main(facility)
+	if counter > 0:
+		print(text)
+		sys.exit(0)
+	else:
+		sys.exit(0)
