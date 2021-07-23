@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# book2json_opac.py for 神戸市立図書館 (ver.20210722)
+# book2json_opac.py for 神戸市立図書館 (ver.20210723)
 # Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 import datetime
@@ -16,7 +16,8 @@ from selenium.webdriver.common.by import By
 timeout = 30
 url_base = 'https://www.lib.city.kobe.jp'
 url_login = url_base + '/opac/opacs/mypage_display'
-url_check = url_base + '/opac/opacs/lending_display'
+url_lending = url_base + '/opac/opacs/lending_display'
+url_reservation = url_base + '/opac/opacs/reservation_display'
 url_logout = url_base + '/opac/opacs/logout'
 
 def do_login(username, password):
@@ -41,23 +42,19 @@ def wait_element(attribute, target):
 	else:
 		return True
 
-def main():
-	driver.get(url_login)
-	wait_element('XPATH', '//*[@id="tabmain"]/form/div/div[3]/input[1]') # ログインボタン
-	do_login(username, password)
-	wait_element('XPATH', '//*[@id="tabmain"]/div[2]/dl/dt[1]/a') # 貸出状況
-	driver.get(url_check)
-	wait_element('XPATH', '//*[@id="tabmain"]/form[2]/input[1]') # 終了ボタン
-
+def parse_table(mode, driver, url):
 	output = {}
+	output['items'] = []
 	output['datetime'] = datetime.datetime.now().isoformat() + '+09:00'
-	output['url'] = url_check
+	output['url'] = url
 	trs = driver.find_elements_by_xpath('//*[@id="tabmain"]/form[1]/div/table/tbody/tr')
 	ths = driver.find_elements_by_xpath('//*[@id="tabmain"]/form[1]/div/table/tbody/tr/th')
 	if ths:
-		output['borrowing'] = []
 		ths_text = [a.text for a in ths]
-		ths_text[0] = 'id'
+		if mode == 'reservation':
+			ths_text.insert(0, 'id')
+		else:
+			ths_text[0] = 'id'
 		for i in range(len(trs)):
 			tds = trs[i].find_elements_by_tag_name('td')
 			if tds:
@@ -71,13 +68,38 @@ def main():
 						keys = ths_text[j].split('/')
 						values = tds[j].text.split('/')
 						for k in range(len(keys)):
-							item[keys[k].strip()] = values[k].strip()
+							if k < len(values):
+								item[keys[k].strip()] = values[k].strip()
 						item['name'] = item['書名']
-				output['borrowing'].append(item)
+				if mode == 'reservation':
+					if item['状況'] == '受取可':
+						item['ready'] = True # 動作確認はまだ
+					else:
+						item['ready'] = False
+				output['items'].append(item)
 		output['status'] = 'success'
 	else:
 		output['status'] = 'failure'
-	print(json.dumps(output), end='')
+	return output
+
+def main():
+	driver.get(url_login)
+	wait_element('XPATH', '//*[@id="tabmain"]/form/div/div[3]/input[1]') # ログインボタン
+	do_login(username, password)
+	wait_element('XPATH', '//*[@id="tabmain"]/div[2]/dl/dt[1]/a') # 貸出状況
+	outputs = {}
+	outputs['status'] = 'failure'
+	# 貸出状況照会
+	driver.get(url_reservation)
+	wait_element('XPATH', '//*[@id="tabmain"]/form/p/input[6]') # 終了ボタン
+	outputs['reservation'] = parse_table('reservation', driver, url_reservation)
+	# 予約状況照会
+	driver.get(url_lending)
+	wait_element('XPATH', '//*[@id="tabmain"]/form[2]/input[1]') # 終了ボタン
+	outputs['borrowing'] = parse_table('borrowing', driver, url_lending)
+	if (outputs['reservation']['status'] == 'success') or (outputs['borrowing']['status'] == 'success'):
+		outputs['status'] = 'success'
+	print(json.dumps(outputs), end='')
 	driver.get(url_logout)
 	wait_element('XPATH', '//*[@id="footer"]') # footer
 	return
@@ -99,5 +121,7 @@ if __name__ == '__main__':
 		driver = webdriver.Chrome(options=options)
 		main()
 		driver.quit()
-	except:
+	except KeyboardInterrupt:
+		driver.quit()
+	finally:
 		driver.quit()

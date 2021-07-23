@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# book2json_d-library.py for 神戸市電子図書館 (ver.20210722)
+# book2json_d-library.py for 神戸市電子図書館 (ver.20210723)
 # Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 import datetime
@@ -46,17 +46,20 @@ def main():
 	wait_element('XPATH', '//*[@id="main-contents"]/div[1]/form/div[3]/button') # ログインボタン
 	do_login(username, password)
 	wait_element('XPATH', '//*[@id="footer"]/p[1]') # ページの終わりです
+	# 利用状況
 	driver.get(url_check)
 	wait_element('XPATH', '//*[@id="footer"]/p[1]') # ページの終わりです
-
 	r_lis = driver.find_elements_by_xpath('//*[@id="reservation-material"]/ol/li') # 予約している資料
 	b_lis = driver.find_elements_by_xpath('//*[@id="borrowed-material"]/ol/li') # 借りている資料
 	output = {}
 	output['datetime'] = datetime.datetime.now().isoformat() + '+09:00'
 	output['url'] = url_check
+	output['status'] = 'failure'
 	if r_lis:
 		# 予約している資料
-		output['reservation'] = []
+		output['reservation'] = {}
+		output['reservation']['status'] = 'failure'
+		output['reservation']['items'] = []
 		for i in range(len(r_lis)):
 			dts = r_lis[i].find_elements_by_tag_name('dt')
 			dds = r_lis[i].find_elements_by_tag_name('dd')
@@ -64,17 +67,20 @@ def main():
 			item['id'] = int(i + 1)
 			for j in range(len(dts)):
 				item[dts[j].text] = dds[j].text
-				if dts[j].text == '予約資料名':
-					item['name'] = dds[j].text
+				if dts[j].text == '予約資料名' or dts[j].text == '取り置き資料名':
+					item['name'] = dds[j].find_element_by_tag_name('a').text
 			lend = r_lis[i].find_element_by_xpath('child::form/div/div/button[1]')
 			if lend.get_attribute('disabled'):
-				item['button_lend'] = False
+				item['ready'] = False
 			else:
-				item['button_lend'] = True
-			output['reservation'].append(item)
+				item['ready'] = True
+			output['reservation']['items'].append(item)
+			output['reservation']['status'] = 'success'
 	if b_lis:
 		# 借りている資料
-		output['borrowing'] = []
+		output['borrowing'] = {}
+		output['borrowing']['status'] = 'failure'
+		output['borrowing']['items'] = []
 		for i in range(len(b_lis)):
 			dts = b_lis[i].find_elements_by_tag_name('dt')
 			dds = b_lis[i].find_elements_by_tag_name('dd')
@@ -87,10 +93,9 @@ def main():
 					item['date_return'] = dt.isoformat() + '.000000+09:00'
 				if dts[j].text == '資料名':
 					item['name'] = dds[j].text
-			output['borrowing'].append(item)
-	if not(r_lis) and not(b_lis):
-		output['status'] = 'failure'
-	else:
+			output['borrowing']['items'].append(item)
+			output['borrowing']['status'] = 'success'
+	if r_lis or b_lis:
 		output['status'] = 'success'
 	print(json.dumps(output), end='')
 	driver.get(url_logout)
@@ -114,5 +119,7 @@ if __name__ == '__main__':
 		driver = webdriver.Chrome(options=options)
 		main()
 		driver.quit()
-	except:
+	except KeyboardInterrupt:
+		driver.quit()
+	finally:
 		driver.quit()
