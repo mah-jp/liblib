@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# json2alert.py (ver.20210723)
+# json2alert.py (ver.20210810)
 # Usage: cat BOOK.json | $0 [図書館名]
 
 import json
@@ -25,7 +25,14 @@ def main(pretext):
 				s_diff = (d_end - d_now).total_seconds()
 				if s_diff < (60*60) * hour_deadline:
 					counter_b = counter_b + 1
-					text_b = text_b + ('%d冊目、『%s』。' % (counter_b, item['name']))
+					d_diff = s_diff // (60*60*24)
+					if d_diff == 0:
+						text_d = 'が明日'
+					elif d_diff == 1:
+						text_d = 'が明後日'
+					else:
+						text_d = ''
+					text_b = text_b + ('%d冊目、『%s』%s。' % (counter_b, item['name'], text_d))
 			if counter_b > 0:
 				text_b = ('%s次の本、%d冊が返却期限です！ ' % (pretext, counter_b)) + text_b
 	# 予約している資料のチェック
