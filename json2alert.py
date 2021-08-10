@@ -25,8 +25,12 @@ def main(pretext):
 				s_diff = (d_end - d_now).total_seconds()
 				if s_diff < (60*60) * hour_deadline:
 					counter_b = counter_b + 1
-					d_diff = s_diff // (60*60*24)
-					if d_diff == 0:
+					d_diff = (s_diff - 1) // (60*60*24)
+					if d_diff <= -2:
+						text_d = 'が期限切れ'
+					elif d_diff == -1:
+						text_d = 'が本日'
+					elif d_diff == 0:
 						text_d = 'が明日'
 					elif d_diff == 1:
 						text_d = 'が明後日'
