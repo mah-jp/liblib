@@ -4,7 +4,7 @@
 
 |スクリプト名|内容|
 |---|---|
-|`book2json_opac.py`|神戸市立図書館で借りている本の情報をJSON化するPythonスクリプト|
+|`book2json_opac.py`|神戸市立図書館で借りている本と予約している本の情報をJSON化するPythonスクリプト|
 |`book2json_d-library.py`|神戸市電子図書館で借りている本と予約している本の情報をJSON化するPythonスクリプト|
 |`json2alert.py`|`book2json_{opac,d-library}.py`が出力するJSONを読み込み、返却期限が近い本と取り置き中の予約本の書名を出力するPythonスクリプト|
 |`bookcheck_sample.sh`|`book2json_{opac,d-library}.py`と`json2alert.py`を組み合わせて起動するbashスクリプトのサンプル|
