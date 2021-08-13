@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-# json2alert.py (ver.20210810)
+# json2alert.py (ver.20210813)
 # Usage: cat BOOK.json | $0 [図書館名]
 
 import json
 import datetime
 import sys
 
-hour_deadline = 24 # 期限日00:00のN時間前から発動させるか
+hour_deadline = 48 # 期限日00:00のN時間前から発動させるか
 
 def main(pretext):
 	data_json = json.loads(sys.stdin.read())
