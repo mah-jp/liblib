@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# book2json_opac.py for 神戸市立図書館 (ver.20210723)
+# book2json_opac.py for 神戸市立図書館 (ver.20220118)
 # Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 import datetime
@@ -118,6 +118,7 @@ if __name__ == '__main__':
 				sys.exit(2)
 		options = webdriver.ChromeOptions()
 		options.add_argument('--headless')
+		options.add_argument('--disable-gpu')
 		driver = webdriver.Chrome(options=options)
 		main()
 		driver.quit()
