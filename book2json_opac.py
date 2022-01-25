@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# book2json_opac.py for 神戸市立図書館 (ver.20220118)
+# book2json_opac.py for 神戸市立図書館 (ver.20220125)
 # Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 import datetime
@@ -71,6 +71,7 @@ def parse_table(mode, driver, url):
 							if k < len(values):
 								item[keys[k].strip()] = values[k].strip()
 						item['name'] = item['書名']
+						item['name_short'] = item['書名'].split(' : ', 1)[0]
 				if mode == 'reservation':
 					if item['状況'] == '受取可':
 						item['ready'] = True # 動作確認はまだ

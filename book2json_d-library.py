@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# book2json_d-library.py for 神戸市電子図書館 (ver.20220118)
+# book2json_d-library.py for 神戸市電子図書館 (ver.20220125)
 # Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 import datetime
@@ -93,6 +93,7 @@ def main():
 					item['date_return'] = dt.isoformat() + '.000000+09:00'
 				if dts[j].text == '資料名':
 					item['name'] = dds[j].text
+					item['name_short'] = dds[j].text.split(' ： ', 1)[0]
 			output['borrowing']['items'].append(item)
 			output['borrowing']['status'] = 'success'
 	if r_lis or b_lis:
