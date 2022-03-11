@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# book2json_d-library.py for 神戸市電子図書館 (ver.20220125)
+# book2json_d-library.py for 神戸市電子図書館 (ver.20220312)
 # Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 import datetime
@@ -20,9 +20,9 @@ url_check = url_base + '/kobe/g1003/mypage/'
 url_logout = url_base + '/kobe/g1001/login/logout/'
 
 def do_login(username, password):
-	driver.find_element_by_id('loginID').send_keys(username)
-	driver.find_element_by_id('loginPass').send_keys(password)
-	driver.find_element_by_xpath('//*[@id="main-contents"]/div[1]/form/div[3]/button').click()
+	driver.find_element(by=By.ID, value='loginID').send_keys(username)
+	driver.find_element(by=By.ID, value='loginPass').send_keys(password)
+	driver.find_element(by=By.XPATH, value='//*[@id="main-contents"]/div[1]/form/div[3]/button').click()
 	return
 
 def wait_element(attribute, target):
@@ -49,8 +49,8 @@ def main():
 	# 利用状況
 	driver.get(url_check)
 	wait_element('XPATH', '//*[@id="footer"]/p[1]') # ページの終わりです
-	r_lis = driver.find_elements_by_xpath('//*[@id="reservation-material"]/ol/li') # 予約している資料
-	b_lis = driver.find_elements_by_xpath('//*[@id="borrowed-material"]/ol/li') # 借りている資料
+	r_lis = driver.find_elements(by=By.XPATH, value='//*[@id="reservation-material"]/ol/li') # 予約している資料
+	b_lis = driver.find_elements(by=By.XPATH, value='//*[@id="borrowed-material"]/ol/li') # 借りている資料
 	output = {}
 	output['datetime'] = datetime.datetime.now().isoformat() + '+09:00'
 	output['url'] = url_check
@@ -61,15 +61,15 @@ def main():
 		output['reservation']['status'] = 'failure'
 		output['reservation']['items'] = []
 		for i in range(len(r_lis)):
-			dts = r_lis[i].find_elements_by_tag_name('dt')
-			dds = r_lis[i].find_elements_by_tag_name('dd')
+			dts = r_lis[i].find_elements(by=By.TAG_NAME, value='dt')
+			dds = r_lis[i].find_elements(by=By.TAG_NAME, value='dd')
 			item = {}
 			item['id'] = int(i + 1)
 			for j in range(len(dts)):
 				item[dts[j].text] = dds[j].text
 				if dts[j].text == '予約資料名' or dts[j].text == '取り置き資料名':
-					item['name'] = dds[j].find_element_by_tag_name('a').text
-			lend = r_lis[i].find_element_by_xpath('child::form/div/div/button[1]')
+					item['name'] = dds[j].find_element(by=By.TAG_NAME, value='a').text
+			lend = r_lis[i].find_element(by=By.XPATH, value='child::form/div/div/button[1]')
 			if lend.get_attribute('disabled'):
 				item['ready'] = False
 			else:
@@ -82,8 +82,8 @@ def main():
 		output['borrowing']['status'] = 'failure'
 		output['borrowing']['items'] = []
 		for i in range(len(b_lis)):
-			dts = b_lis[i].find_elements_by_tag_name('dt')
-			dds = b_lis[i].find_elements_by_tag_name('dd')
+			dts = b_lis[i].find_elements(by=By.TAG_NAME, value='dt')
+			dds = b_lis[i].find_elements(by=By.TAG_NAME, value='dd')
 			item = {}
 			item['id'] = int(i + 1)
 			for j in range(len(dts)):
