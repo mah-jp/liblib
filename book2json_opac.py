@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# book2json_opac.py for 神戸市立図書館 (ver.20220125)
+# book2json_opac.py for 神戸市立図書館 (ver.20220312)
 # Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 import datetime
@@ -21,9 +21,9 @@ url_reservation = url_base + '/opac/opacs/reservation_display'
 url_logout = url_base + '/opac/opacs/logout'
 
 def do_login(username, password):
-	driver.find_element_by_id('user_login').send_keys(username)
-	driver.find_element_by_id('user_passwd').send_keys(password)
-	driver.find_element_by_xpath('//*[@id="tabmain"]/form/div/div[3]/input[1]').click()
+	driver.find_element(by=By.ID, value='user_login').send_keys(username)
+	driver.find_element(by=By.ID, value='user_passwd').send_keys(password)
+	driver.find_element(by=By.XPATH, value='//*[@id="tabmain"]/form/div/div[3]/input[1]').click()
 	return
 
 def wait_element(attribute, target):
@@ -47,8 +47,12 @@ def parse_table(mode, driver, url):
 	output['items'] = []
 	output['datetime'] = datetime.datetime.now().isoformat() + '+09:00'
 	output['url'] = url
-	trs = driver.find_elements_by_xpath('//*[@id="tabmain"]/form[1]/div/table/tbody/tr')
-	ths = driver.find_elements_by_xpath('//*[@id="tabmain"]/form[1]/div/table/tbody/tr/th')
+	xpath_tr = '//*[@id="tabmain"]/form[1]/div/table/tbody/tr'
+	trs = driver.find_elements(by=By.XPATH, value=xpath_tr)
+	if trs:
+		if trs[0].get_attribute('style.display') == None: # trが非表示の時は表示させる
+			driver.execute_script("document.evaluate('" + xpath_tr + "', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.style.display = 'table-row';")
+	ths = driver.find_elements(by=By.XPATH, value=xpath_tr + '/th')
 	if ths:
 		ths_text = [a.text for a in ths]
 		if mode == 'reservation':
@@ -56,7 +60,7 @@ def parse_table(mode, driver, url):
 		else:
 			ths_text[0] = 'id'
 		for i in range(len(trs)):
-			tds = trs[i].find_elements_by_tag_name('td')
+			tds = trs[i].find_elements(by=By.TAG_NAME, value='td')
 			if tds:
 				item = {}
 				for j in range(len(tds)):
@@ -74,7 +78,7 @@ def parse_table(mode, driver, url):
 						item['name_short'] = item['書名'].split(' : ', 1)[0]
 				if mode == 'reservation':
 					if item['状況'] == '受取可':
-						item['ready'] = True # 動作確認はまだ
+						item['ready'] = True
 					else:
 						item['ready'] = False
 				output['items'].append(item)
@@ -90,11 +94,11 @@ def main():
 	wait_element('XPATH', '//*[@id="tabmain"]/div[2]/dl/dt[1]/a') # 貸出状況
 	outputs = {}
 	outputs['status'] = 'failure'
-	# 貸出状況照会
+	# 予約状況照会
 	driver.get(url_reservation)
 	wait_element('XPATH', '//*[@id="tabmain"]/form/p/input[6]') # 終了ボタン
 	outputs['reservation'] = parse_table('reservation', driver, url_reservation)
-	# 予約状況照会
+	# 貸出状況照会
 	driver.get(url_lending)
 	wait_element('XPATH', '//*[@id="tabmain"]/form[2]/input[1]') # 終了ボタン
 	outputs['borrowing'] = parse_table('borrowing', driver, url_lending)
