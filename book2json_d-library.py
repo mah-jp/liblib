@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# book2json_d-library.py for 神戸市電子図書館 (ver.20220312)
+# book2json_d-library.py for 神戸市電子図書館 (Ver.20230205)
 # Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 import datetime
@@ -54,11 +54,11 @@ def main():
 	output = {}
 	output['datetime'] = datetime.datetime.now().isoformat() + '+09:00'
 	output['url'] = url_check
-	output['status'] = 'failure'
+	output['status'] = False
 	if r_lis:
 		# 予約している資料
 		output['reservation'] = {}
-		output['reservation']['status'] = 'failure'
+		output['reservation']['status'] = False
 		output['reservation']['items'] = []
 		for i in range(len(r_lis)):
 			dts = r_lis[i].find_elements(by=By.TAG_NAME, value='dt')
@@ -75,11 +75,11 @@ def main():
 			else:
 				item['ready'] = True
 			output['reservation']['items'].append(item)
-			output['reservation']['status'] = 'success'
+			output['reservation']['status'] = True
 	if b_lis:
 		# 借りている資料
 		output['borrowing'] = {}
-		output['borrowing']['status'] = 'failure'
+		output['borrowing']['status'] = False
 		output['borrowing']['items'] = []
 		for i in range(len(b_lis)):
 			dts = b_lis[i].find_elements(by=By.TAG_NAME, value='dt')
@@ -95,9 +95,9 @@ def main():
 					item['name'] = dds[j].text
 					item['name_short'] = dds[j].text.split(' ： ', 1)[0]
 			output['borrowing']['items'].append(item)
-			output['borrowing']['status'] = 'success'
+			output['borrowing']['status'] = True
 	if r_lis or b_lis:
-		output['status'] = 'success'
+		output['status'] = True
 	print(json.dumps(output), end='')
 	driver.get(url_logout)
 	wait_element('XPATH', '//*[@id="footer"]/p[1]') # ページの終わりです
