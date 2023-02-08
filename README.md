@@ -22,7 +22,7 @@
 	```
 	$ export LIBLIB_USERNAME='★★'
 	$ export LIBLIB_PASSWORD='☆☆'
-	$ ./book2json_opac.py | jq
+	$ ./book2json_opac.py | jq .
 	{
 	  "status": true,
 	  "url": "https://www.lib.city.kobe.jp/winj/sp/top.do?lang=ja",
@@ -78,7 +78,7 @@
 	```
 	$ export LIBLIB_USERNAME='★★'
 	$ export LIBLIB_PASSWORD='▲▲'
-	$ ./book2json_d-library.py | jq
+	$ ./book2json_d-library.py | jq .
 	{
 	  "datetime": "2021-07-23T17:21:15.112613+09:00",
 	  "url": "https://www.d-library.jp/kobe/g1003/mypage/",
