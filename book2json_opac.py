@@ -154,13 +154,13 @@ if __name__ == '__main__':
 	try:
 		args = sys.argv
 		if not(os.environ.get('LIBLIB_USERNAME') and os.environ.get('LIBLIB_PASSWORD')):
-			logging.ERROR('Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar; {:s} ID ...'.format(args[0]))
+			logging.error('Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar; {:s} ID ...'.format(args[0]))
 			sys.exit(1)
 		else:
 			username = os.environ.get('LIBLIB_USERNAME')
 			password = os.environ.get('LIBLIB_PASSWORD')
 			if len(username) * len(password) == 0:
-				logging.ERROR('ERROR: LIBLIB_USERNAME and/or LIBLIB_PASSWORD is empty.'.format())
+				logging.error('ERROR: LIBLIB_USERNAME and/or LIBLIB_PASSWORD is empty.'.format())
 				sys.exit(2)
 		url: str = URL_START
 		logger.debug('url={}'.format(url))
@@ -171,5 +171,5 @@ if __name__ == '__main__':
 			d.update({ 'status': True, 'borrowing': r1, 'reservation': r2 })
 		print(json.dumps(d))
 	except KeyboardInterrupt as e:
-		logging.ERROR('{}'.format(e))
+		logging.error('{}'.format(e))
 		raise
