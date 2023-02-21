@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# book2json_opac.py for 神戸市立図書館 (Ver.20230208)
+# book2json_opac.py for 神戸市立図書館 (Ver.20230221)
 # Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 from bs4 import BeautifulSoup # pip3 install bs4
@@ -84,7 +84,8 @@ def parse_html(soup_books, mode: str) -> list:
 				date_end_raw: str = book.find_all('p', attrs={ 'class': 'txt' })[2].text
 				logger.debug('{} date_end_raw={}'.format(mode, cut_space(date_end_raw)))
 				date_end: str = pickup_date(date_end_raw, 'borrowing')
-				d: dict = { 'id': i, '書名': title, 'name': title, '貸出日': date_start, '返却予定日': date_end }
+				count_reserve: int = pickup_reserve(date_end_raw, 'borrowing') # 流用
+				d: dict = { 'id': i, '書名': title, 'name': title, '貸出日': date_start, '返却予定日': date_end, '予約件数': count_reserve }
 				if date_end:
 					dt = datetime.datetime.strptime(date_end + ' 00:00:00 JST', '%Y-%m-%d %H:%M:%S %Z')
 					d['date_return'] = dt.isoformat() + '.000000+09:00'
@@ -135,6 +136,16 @@ def pickup_date(text: str, mode: str) -> str:
 		ymd_str: list = re.findall(r'日\s+(\d{4})\.(\d{1,2})\.(\d{1,2})\s+', text)
 	ymd_int: list = list(map(int, ymd_str[0]))
 	r: str = '{0[0]:0>4d}-{0[1]:0>2d}-{0[2]:0>2d}'.format(ymd_int)
+	return r
+
+def pickup_reserve(text: str, mode: str) -> int:
+	r: int = 0
+	if mode == 'borrowing':
+		count_str: str = re.findall(r'予約:(\d+)件', text)
+	# elif mode == 'reservation':
+	# 
+	if len(count_str) > 0:
+		r = int(count_str[0])
 	return r
 
 if __name__ == '__main__':
