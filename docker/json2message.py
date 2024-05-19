@@ -1,31 +1,31 @@
 #!/usr/bin/env python3
 
-# json2alert.py (Ver.20230205)
-# Usage: cat BOOK.json | $0 [図書館名]
+# json2message.py (Ver.20240519)
+# Usage: cat hoge.json | $0 [PREFIX]
 
 import json
 import datetime
 import sys
 
-hour_deadline = 48 # 期限日00:00のN時間前から発動させるか
+hour_deadline: int = 48 # 期限日00:00のN時間前からメッセージを出力するか
 
-def main(pretext):
-	data_json = json.loads(sys.stdin.read())
+def main(pretext: str = '') -> tuple[int, str]:
+	data_json: dict = json.loads(sys.stdin.read())
 	d_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
-	counter_b = 0
-	counter_r = 0
-	text_b = ''
-	text_r = ''
+	counter_b: int = 0
+	counter_r: int = 0
+	text_b: str = ''
+	text_r: str = ''
 	# 借りている資料のチェック
 	if 'borrowing' in data_json:
 		if data_json['borrowing']['status'] == True:
 			for i in range(len(data_json['borrowing']['items'])):
-				item = data_json['borrowing']['items'][i]
+				item: dict = data_json['borrowing']['items'][i]
 				d_end = datetime.datetime.fromisoformat(item['date_return'])
-				s_diff = (d_end - d_now).total_seconds()
+				s_diff: int = (d_end - d_now).total_seconds() # 期限までの秒数
 				if s_diff < (60*60) * hour_deadline:
 					counter_b = counter_b + 1
-					d_diff = (s_diff - 1) // (60*60*24)
+					d_diff: int = (s_diff - 1) // (60*60*24) # 期限までの日数 (本日=-1)
 					if d_diff <= -2:
 						text_d = 'が期限切れ'
 					elif d_diff == -1:
@@ -44,7 +44,7 @@ def main(pretext):
 	if 'reservation' in data_json:
 		if data_json['reservation']['status'] == True:
 			for i in range(len(data_json['reservation']['items'])):
-				item = data_json['reservation']['items'][i]
+				item: dict = data_json['reservation']['items'][i]
 				if item['ready'] == True:
 					counter_r = counter_r + 1
 					text_r = text_r + ('%d冊目、『%s』。' % (counter_r, item['name']))
@@ -54,8 +54,10 @@ def main(pretext):
 	return(counter_b + counter_r, text_b + text_r)
 
 if __name__ == '__main__':
-	args = sys.argv
-	pretext = ''
+	args: list = sys.argv
+	pretext: str = ''
+	counter: int = 0
+	text: str = ''
 	if len(args) > 1:
 		pretext = args[1]
 	(counter, text) = main(pretext)

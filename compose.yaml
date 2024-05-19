@@ -1,0 +1,17 @@
+services:
+  webscraper:
+    build: .
+    container_name: ${COMPOSE_PROJECT_NAME}
+    volumes:
+      - type: bind
+        source: ./env/
+        target: /opt/liblib/env/
+        read_only: true
+      - type: bind
+        source: ./output/
+        target: /opt/liblib/output/
+        read_only: false
+    environment:
+      - FILE_ENV=${FILE_ENV}
+    cap_add:
+      - SYS_ADMIN

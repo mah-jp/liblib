@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 
-# book2json_opac.py for 神戸市立図書館 (Ver.20230221)
-# Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
+# book2json_opac.py for 神戸市立図書館 (Ver.20240519)
+# Usage: LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 from bs4 import BeautifulSoup # pip3 install bs4
 from playwright.sync_api import Playwright, sync_playwright, expect # pip3 install playwright
 import datetime
 import json
+import logging
 import os
 import re
 import sys
-import logging
 logger = logging.getLogger(__name__)
 
 URL_START: str = 'https://www.lib.city.kobe.jp/winj/sp/top.do?lang=ja' # winj スマートフォン版
+URL_DETAIL: str = 'https://www.lib.city.kobe.jp/winj/opac/switch-detail.do?lang=ja&bibid={:s}' # ID部分は{:s}
 
+# ウェブスクレイピング
 def run(playwright: Playwright, url: str, username: str, password: str) -> list:
 	browser = playwright.chromium.launch(headless=True)
 	context = browser.new_context()
@@ -34,12 +36,15 @@ def run(playwright: Playwright, url: str, username: str, password: str) -> list:
 	expect(page).to_have_title(re.compile('Myライブラリ'))
 	page.get_by_role('link', name='借りている資料').click()
 	expect(page).to_have_title(re.compile('貸出状況一覧'))
+	page.wait_for_load_state('domcontentloaded')
 	soup = BeautifulSoup(page.content(), 'html.parser')
 	soup_checktext: str = soup.find('div', attrs={ 'class': 'strMain' }).text
 	logger.debug('borrowing soup_checktext={}'.format(cut_space(soup_checktext)))
-	if not re.search('該当するリストが存在しません。', soup_checktext): # 内容が表示されている
+	if not re.search('該当するリストが存在しません。', soup_checktext):
+		# 内容が表示されていたら
 		page.get_by_role('combobox', name='一覧表示件数').select_option('50')
 		expect(page).to_have_title(re.compile('貸出状況一覧'))
+		page.wait_for_load_state('domcontentloaded')
 		soup = BeautifulSoup(page.content(), 'html.parser')
 		soup_books = soup.find('ul', attrs={ 'class': 'listBookBa-2 function' }).find_all('li')
 		books_borrowing.update({ 'status': True, 'items': parse_html(soup_books, 'borrowing') })
@@ -47,16 +52,19 @@ def run(playwright: Playwright, url: str, username: str, password: str) -> list:
 
 	# reservation (予約した資料)
 	books_reservation: dict = { 'status': False, 'items': [] }
-	page.get_by_role("link", name="戻る").click()
+	page.get_by_role('link', name='戻る').click()
 	expect(page).to_have_title(re.compile('Myライブラリ'))
 	page.get_by_role('link', name='予約した資料').click()
 	expect(page).to_have_title(re.compile('予約状況一覧'))
+	page.wait_for_load_state('domcontentloaded')
 	soup = BeautifulSoup(page.content(), 'html.parser')
 	soup_checktext: str = soup.find('div', attrs={ 'class': 'strMain' }).text
 	logger.debug('reservation soup_checktext={}'.format(cut_space(soup_checktext)))
-	if not re.search('該当するリストが存在しません。', soup_checktext): # 内容が表示されていたら
+	if not re.search('該当するリストが存在しません。', soup_checktext):
+		# 内容が表示されていたら
 		page.get_by_role('combobox', name='一覧表示件数').select_option('50')
 		expect(page).to_have_title(re.compile('予約状況一覧'))
+		page.wait_for_load_state('domcontentloaded')
 		soup = BeautifulSoup(page.content(), 'html.parser')
 		soup_books = soup.find('ul', attrs={ 'class': 'listBookBa' }).find_all('li')
 		books_reservation.update({ 'status': True, 'items': parse_html(soup_books, 'reservation') })
@@ -67,25 +75,28 @@ def run(playwright: Playwright, url: str, username: str, password: str) -> list:
 	browser.close()
 	return books_borrowing, books_reservation
 
+# HTMLの解析
 def parse_html(soup_books, mode: str) -> list:
 	books: list = []
 	i: int = 1
 	for book in soup_books:
-		logger.debug('{} book={}'.format(mode, cut_space(book.text)))
+		logger.debug('{:s} book={}'.format(mode, cut_space(book.text)))
 		if book.find('p', attrs={ 'class': 'title' }): # 資料のタイトルがあったら
 			title_raw: str = book.find('p', attrs={ 'class': 'title' }).find('span', attrs={ 'class': 'title' }).text
-			logger.debug('{} title_raw={}'.format(mode, cut_space(title_raw)))
+			logger.debug('{:s} title_raw={}'.format(mode, cut_space(title_raw)))
 			title: str = pickup_title(title_raw)
 			if mode == 'borrowing':
 				# 借りている資料
 				date_start_raw: str = book.find_all('p', attrs={ 'class': 'txt' })[1].text
-				logger.debug('{} date_start_raw={}'.format(mode, cut_space(date_start_raw)))
+				logger.debug('{:s} date_start_raw={}'.format(mode, cut_space(date_start_raw)))
 				date_start: str = pickup_date(date_start_raw, 'borrowing')
 				date_end_raw: str = book.find_all('p', attrs={ 'class': 'txt' })[2].text
-				logger.debug('{} date_end_raw={}'.format(mode, cut_space(date_end_raw)))
+				logger.debug('{:s} date_end_raw={}'.format(mode, cut_space(date_end_raw)))
 				date_end: str = pickup_date(date_end_raw, 'borrowing')
-				count_reserve: int = pickup_reserve(date_end_raw, 'borrowing') # 流用
-				d: dict = { 'id': i, '書名': title, 'name': title, '貸出日': date_start, '返却予定日': date_end, '予約件数': count_reserve }
+				count_reserve: int = pickup_reserve(date_end_raw, 'borrowing') # date_end_rawから無理矢理に取得
+				imgsrc_raw: str = book.find('p', attrs={ 'class': 'title' }).find('img').get('src')
+				url: str = make_url(URL_DETAIL, imgsrc_raw)
+				d: dict = { 'id': i, '書名': title, 'name': title, 'url': url, '貸出日': date_start, '返却予定日': date_end, '予約件数': count_reserve }
 				if date_end:
 					dt = datetime.datetime.strptime(date_end + ' 00:00:00 JST', '%Y-%m-%d %H:%M:%S %Z')
 					d['date_return'] = dt.isoformat() + '.000000+09:00'
@@ -93,16 +104,18 @@ def parse_html(soup_books, mode: str) -> list:
 			elif mode == 'reservation':
 				# 予約した資料
 				date_order_raw: str = book.find_all('p', attrs={ 'class': 'txt' })[1].text
-				logger.debug('{} date_order_raw={}'.format(mode, cut_space(date_order_raw)))
+				logger.debug('{:s} date_order_raw={}'.format(mode, cut_space(date_order_raw)))
 				date_order: str = pickup_date(date_order_raw, 'reservation')
 				library_raw: str = book.find_all('p', attrs={ 'class': 'txt' })[1].text
-				logger.debug('{} library_raw={}'.format(mode, cut_space(library_raw)))
+				logger.debug('{:s} library_raw={}'.format(mode, cut_space(library_raw)))
 				library: str = pickup_library(library_raw)
 				orderstatus_raw: str = book.find_all('p', attrs={ 'class': 'txt' })[2].text
-				logger.debug('{} orderstatus_raw={}'.format(mode, cut_space(orderstatus_raw)))
+				logger.debug('{:s} orderstatus_raw={}'.format(mode, cut_space(orderstatus_raw)))
 				orderstatus: str = pickup_orderstatus(orderstatus_raw)
-				d: dict = { 'id': i, '書名': title, 'name': title, '予約日': date_order, '受取館': library, '予約状態': orderstatus, 'ready': False }
-				if re.match('利用可能', orderstatus): # Ref: https://www.city.kobe.lg.jp/documents/1570/k-lib_help.pdf#page=29
+				imgsrc_raw: str = book.find('p', attrs={ 'class': 'title' }).find('img').get('src')
+				url: str = make_url(URL_DETAIL, imgsrc_raw)
+				d: dict = { 'id': i, '書名': title, 'name': title, 'url': url, '予約日': date_order, '受取館': library, '予約状態': orderstatus, 'ready': False }
+				if re.match('利用可能', orderstatus): # Ref: https://www.city.kobe.lg.jp/documents/1570/k-lib_help.pdf#page=30
 					d['ready'] = True
 				books.append(d)
 			i += 1
@@ -134,8 +147,8 @@ def pickup_date(text: str, mode: str) -> str:
 		ymd_str: list = re.findall(r'.*日:\n*(\d{4})\.(\d{1,2})\.(\d{1,2})', text)
 	elif mode == 'reservation':
 		ymd_str: list = re.findall(r'日\s+(\d{4})\.(\d{1,2})\.(\d{1,2})\s+', text)
-	ymd_int: list = list(map(int, ymd_str[0]))
-	r: str = '{0[0]:0>4d}-{0[1]:0>2d}-{0[2]:0>2d}'.format(ymd_int)
+	ymd_int_list: list = list(map(int, ymd_str[0]))
+	r: str = '{0[0]:0>4d}-{0[1]:0>2d}-{0[2]:0>2d}'.format(ymd_int_list)
 	return r
 
 def pickup_reserve(text: str, mode: str) -> int:
@@ -148,24 +161,27 @@ def pickup_reserve(text: str, mode: str) -> int:
 		r = int(count_str[0])
 	return r
 
+def make_url(url_base: str, path: str) -> str:
+	bibid: str = re.findall(r'bibid=(\d+)', path)[0]
+	url: str = url_base.format(bibid)
+	return url
+
 if __name__ == '__main__':
 	DIR_ME: str = os.path.dirname(os.path.abspath(__file__))
-	FILE_ME: str = os.path.splitext(os.path.basename(__file__))[0]
 	FILE_ME: str = os.path.basename(__file__)
-	FILE_LOGGING: str = os.path.join(DIR_ME, FILE_ME + '.log')
 	# loggingモジュールの設定 (debug, info, warning, error, critical)
 	logging.basicConfig(
-		# level=logging.DEBUG,
-		level=logging.ERROR,
-		format='[%(asctime)s] %(name)s[%(thread)d]:%(funcName)s:%(lineno)d <%(levelname)s> %(message)s',
-		# filename=FILE_LOGGING
+		level=logging.WARNING,
+		format='[%(asctime)s] %(name)s[%(thread)d]:%(funcName)s:%(lineno)d <%(levelname)s> %(message)s'
 	)
-	logger.debug('FILE_LOGGING={}'.format(FILE_LOGGING))
+	if os.environ.get('LOGGING_DEBUG') and os.environ.get('LOGGING_DEBUG') == '1':
+		logging.getLogger().setLevel(logging.DEBUG)
+		logging.debug('LOGGING_DEBUG={:s}'.format(os.environ.get('LOGGING_DEBUG')))
 
 	try:
 		args = sys.argv
 		if not(os.environ.get('LIBLIB_USERNAME') and os.environ.get('LIBLIB_PASSWORD')):
-			logging.error('Usage: export LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar; {:s} ID ...'.format(args[0]))
+			logging.error('Usage: LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar; {:s}'.format(args[0]))
 			sys.exit(1)
 		else:
 			username = os.environ.get('LIBLIB_USERNAME')
@@ -180,7 +196,7 @@ if __name__ == '__main__':
 			r1, r2 = run(playwright, url, username, password)
 			logger.debug('borrowing={}, reservation={}'.format(r1, r2))
 			d.update({ 'status': True, 'borrowing': r1, 'reservation': r2 })
-		print(json.dumps(d))
+		print(json.dumps(d, ensure_ascii=False, indent=2))
 	except KeyboardInterrupt as e:
 		logging.error('{}'.format(e))
 		raise

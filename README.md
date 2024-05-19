@@ -1,158 +1,139 @@
 # LibLibとは
 
-図書館で借りた本の返却忘れと予約本の借り忘れを防ぐための、次のスクリプトのセットです。
+- Date: 2024-05-19
+
+図書館で借りた本の返却忘れと予約本の借り忘れを防ぐための、作者の事情により神戸市立図書館と神戸市電子図書館に特化している、次のスクリプトのセットです。v2.0.0ではDocker環境での動作を前提する作り変えを行い、セットアップが以前より簡単になりました。
 
 |スクリプト名|内容|
 |---|---|
+|`bookcheck.sh`|`book2json_{opac,d-library}.py`と`json2message.py`を組み合わせて起動するbashスクリプト|
 |`book2json_opac.py`|神戸市立図書館で借りている本と予約している本の情報をJSON化するPythonスクリプト|
 |`book2json_d-library.py`|神戸市電子図書館で借りている本と予約している本の情報をJSON化するPythonスクリプト|
-|`json2alert.py`|`book2json_{opac,d-library}.py`が出力するJSONを読み込み、返却期限が近い本と取り置き中の予約本の書名を出力するPythonスクリプト|
-|`bookcheck_sample.sh`|`book2json_{opac,d-library}.py`と`json2alert.py`を組み合わせて起動するbashスクリプトのサンプル|
+|`json2message.py`|`book2json_{opac,d-library}.py`が出力するJSONを読み込み、返却期限が近い本と取り置き中の予約本の書名をテキスト出力するPythonスクリプト|
 
-## 各スクリプトの使い方
+## セットアップ方法・使い方
 
-### まず最初に
+1. 動作させるサーバ等にDocker環境を整えます
+2. 本リポジトリをcloneします
+	```
+	$ git clone https://github.com/mah-jp/liblib
+	$ cd liblib
+	```
+3. [envディレクトリ](./blob/main/env/)内の設定ファイル`sample.env`を複製して、`任意の名前.env`を作成します
+4. `任意の名前.env`をテキストエディタで開き、各種変数を定義します
+5. 次のコマンドを実行します
+	```
+	$ FILE_ENV=任意の名前.env ./bookcheck.sh
+	```
+6. 設定ファイルの内容に基づいて図書館サイトへアクセスが行われ、借りている本と予約している本の情報がoutputディレクトリ内に保存されます
 
-本リポジトリをcloneし、LibLibの実行に必要なPythonモジュールをinstallします。
+## outputディレクトリ内に保存されるファイル
+
+### 1. JSONファイルについて
+
+|ファイル名|対象図書館|内容|
+|---|---|---|
+|`opac.json`|神戸市立図書館|借りている本と予約している本の情報|
+|`d-library.json`|神戸市電子図書館|借りている本と予約している本の情報|
+
+#### opac.json (神戸市立図書館)
+
+このJSONファイルは`book2json_opac.py`が出力し、神戸市立図書館で借りている本と予約している本の情報を含みます。JSONの構造は次のとおりです。
 ```
-$ git clone https://github.com/mah-jp/liblib
-$ cd liblib
-$ pip3 install -r ./requirements.txt
-$ playwright install
+{
+  "status": true,
+  "url": "https://www.lib.city.kobe.jp/winj/sp/top.do?lang=ja",
+  "borrowing": {
+    "status": true,
+    "items": [
+      {
+        "id": 1,
+        "書名": "タイトルHOGEHOGE1",
+        "name": "タイトルHOGEHOGE1",
+        "url": "https://www.lib.city.kobe.jp/winj/opac/switch-detail.do?lang=ja&bibid=XXXXXXXXXX",
+        "貸出日": "2024-05-19",
+        "返却予定日": "2024-06-02",
+        "予約件数": 0,
+        "date_return": "2024-06-02T00:00:00.000000+09:00"
+      }
+    ],
+    "datetime": "2024-05-19T23:22:41.947999+09:00"
+  },
+  "reservation": {
+    "status": true,
+    "items": [
+      {
+        "id": 1,
+        "書名": "タイトルHOGEHOGE2",
+        "name": "タイトルHOGEHOGE2",
+        "url": "https://www.lib.city.kobe.jp/winj/opac/switch-detail.do?lang=ja&bibid=XXXXXXXXXX",
+        "予約日": "2024-05-19",
+        "受取館": "HOGE図書館",
+        "予約状態": "返却待ち 順番：1",
+        "ready": false
+      }
+    ],
+    "datetime": "2024-05-19T23:22:42.640295+09:00"
+  }
+}
 ```
 
-### book2json_opac.py
+#### d-library.json (神戸市電子図書館)
 
-1. 次の環境変数に値を代入します
-	|環境変数名|値の内容|
-	|---|---|
-	|LIBLIB_USERNAME|図書館カード番号|
-	|LIBLIB_PASSWORD|パスワード|
-2. `book2json_opac.py`を実行すると、神戸市立図書館で借りている本と予約している本の情報が以下のJSON形式で標準出力されます
-	```
-	$ export LIBLIB_USERNAME='★★'
-	$ export LIBLIB_PASSWORD='☆☆'
-	$ ./book2json_opac.py | jq .
-	{
-	  "status": true,
-	  "url": "https://www.lib.city.kobe.jp/winj/sp/top.do?lang=ja",
-	  "borrowing": {
-	    "status": true,
-	    "items": [
-	      {
-	        "id": 1,
-	        "書名": "●●",
-	        "name": "●●",
-	        "貸出日": "2023-02-01",
-	        "返却予定日": "2023-02-15",
-	        "date_return": "2023-02-15T00:00:00.000000+09:00"
-	      }
-	    ],
-	    "datetime": "2023-02-08T23:07:59.114602+09:00"
-	  },
-	  "reservation": {
-	    "status": true,
-	    "items": [
-	      {
-	        "id": 1,
-	        "書名": "●●",
-	        "name": "●●",
-	        "予約日": "2022-11-04",
-	        "受取館": "●●図書館",
-	        "予約状態": "利用可能 取置期限日:2023.02.16",
-	        "ready": true
-	      },
-	      {
-	        "id": 2,
-	        "書名": "●●",
-	        "name": "●●",
-	        "予約日": "2022-09-10",
-	        "受取館": "●●図書館",
-	        "予約状態": "返却待ち 順番：4",
-	        "ready": false
-	      }
-	    ],
-	    "datetime": "2023-02-08T23:07:04.519431+09:00"
-	  }
-	}
-	```
+このJSONファイルは`book2json_d-library.py.py`が出力し、神戸市電子図書館で借りている本と予約している本の情報を含みます。JSONの構造は次のとおりです。
+```
+{
+  "status": true,
+  "url": "https://web.d-library.jp/kobe/g1001/top/",
+  "borrowing": {
+    "status": true,
+    "items": [
+      {
+        "id": 1,
+        "書名": "タイトルHOGEHOGE3",
+        "name": "タイトルHOGEHOGE3",
+        "url": "https://web.d-library.jp/kobe/g0102/libcontentsinfo/?conid=XXXXXX",
+        "利用期限日": "2024-06-02",
+        "date_return": "2024-06-02T00:00:00.000000+09:00"
+      }
+    ],
+    "datetime": "2024-05-19T22:58:35.685335+09:00"
+  },
+  "reservation": {
+    "status": true,
+    "items": [
+      {
+        "id": 1,
+        "書名": "タイトルHOGEHOGE4",
+        "name": "タイトルHOGEHOGE4",
+        "url": "https://web.d-library.jp/kobe/g0102/libcontentsinfo/?conid=XXXXXX",
+        "予約日": "2024-04-03",
+        "予約状態": "18人中16番目",
+        "ready": false
+      }
+    ],
+    "datetime": "2024-05-19T22:58:38.513928+09:00"
+  }
+}
+```
 
-### book2json_d-library.py
+### 2. TXTファイルについて
 
-1. 次の環境変数に値を代入します
-	|環境変数名|値の内容|
-	|---|---|
-	|LIBLIB_USERNAME|利用者ID|
-	|LIBLIB_PASSWORD|パスワード|
-2. `book2json_d-library.py`を実行すると、神戸市電子図書館で借りている本と予約している本の情報が以下のJSON形式で標準出力されます
-	```
-	$ export LIBLIB_USERNAME='★★'
-	$ export LIBLIB_PASSWORD='▲▲'
-	$ ./book2json_d-library.py | jq .
-	{
-	  "datetime": "2021-07-23T17:21:15.112613+09:00",
-	  "url": "https://www.d-library.jp/kobe/g1003/mypage/",
-	  "status": true,
-	  "reservation": {
-	    "status": true,
-	    "items": [
-	      {
-	        "id": 1,
-	        "取り置き期限": "2021年7月30日",
-	        "取り置き資料名": "●●",
-	        "name": "●●",
-	        "著者": "●●",
-	        "ready": true
-	      },
-	      {
-	        "id": 2,
-	        〜〜途中省略〜〜
-	        "ready": false
-	      }
-	    ]
-	  },
-	  "borrowing": {
-	    "status": true,
-	    "items": [
-	      {
-	        "id": 1,
-	        "資料名": "●●",
-	        "name": "●●",
-	        "著者": "●●",
-	        "ご利用期限日": "2021年8月1日",
-	        "date_return": "2021-08-01T00:00:00.000000+09:00"
-	      }
-	    ]
-	  }
-	}
-	```
+|ファイル名|対象図書館|内容|
+|---|---|---|
+|`opac.txt`|神戸市立図書館|`opac.json`から下記条件で抽出した情報|
+|`d-library.txt`|神戸市電子図書館|`d-library.json`から下記条件で抽出した情報|
 
-### json2alert.py
+これらのTXTファイルの内容は、各JSONファイルから次の条件に該当する本の情報を抽出し、話し言葉になるようにテキスト化したものです。条件に該当する本の情報がなかった場合、ファイルはカラ (0バイト) になります。
+- 返却日までの残り時間が48時間以内の本 (例: 返却日が「7月15日」の本は7月13日00:00以降から対象になる)
+- 取り置き中になっている予約本
 
-1. `json2alert.py`を、`book2json_opac.py`または`book2json_d-library.py`が標準出力するJSONを標準入力する形で実行します
-2. 返却日までの残り時間が48時間以内の本の書名がJSONから抽出され (例: 返却日が「7月15日」の本は7月13日00:00以降から抽出対象になる)、音声アナウンス向けにまとめられたものが標準出力されます
-	```
-	$ ./book2json_opac.py | ./json2alert.py '神戸市立図書館の'
-	神戸市立図書館の次の本、2冊が返却期限です！ 1冊目、『●●』が明日。2冊目、『■■』が明後日。以上です。
+例えば神戸市立図書館に関して、『●●』と『■■』の返却期限が近づいており、『▲▲』が取り置き中の場合、`opac.txt`は次のような内容になります。
+- `神戸市立図書館の次の本、2冊が返却期限です！ 1冊目、『●●』が明日。2冊目、『■■』が明後日。次の本、1冊が取り置き中です！ 1冊目、『▲▲』。以上です。`
 
-	$ ./book2json_d-library.py | ./json2alert.py '神戸市電子図書館の'
-	神戸市電子図書館の次の本、1冊が返却期限です！ 1冊目、『●●』が明日。以上です。
-	```
-3. 同様に、取り置き中になっている予約本の書名がJSONから抽出され、音声アナウンス向けにまとめられたものが標準出力されます
-	```
-	$ ./book2json_opac.py | ./json2alert.py '神戸市立図書館の'
-	神戸市立図書館の次の本、1冊が取り置き中です！ 1冊目、『●●』。以上です。
+#### TXTファイルの使い道は？
 
-	$ ./book2json_d-library.py | ./json2alert.py '神戸市電子図書館の'
-	神戸市電子図書館の次の本、1冊が取り置き中です！ 1冊目、『●●』。以上です。
-	```
-4. `json2alert.py`実行時に第1引数が指定されていると、それを標準出力の冒頭に挿入するようにしています (図書館名や家族の名前にしておくとよいでしょう)
-
-### bookcheck_sample.sh
-
-`book2json_{opac,d-library}.py`と`json2alert.py`を組み合わせて起動するbashスクリプトのサンプルです。
-
-私の家では、`json2alert.py`の標準出力を部屋のスマートスピーカーに音声として喋らせるために、別のスクリプトを呼び出しており、そのまんまの内容を本サンプルにしています。この点ご留意ください。
+作者は、返却期限が近い本の返却を忘れないためのリマインダーとして、また予約本が取り置き状態になったら分かる通知として、このTXTファイルの内容を家のスマートスピーカーに喋らせています。
 
 ## AUTHOR
 
