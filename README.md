@@ -6,7 +6,7 @@
 
 |スクリプト名|内容|
 |---|---|
-|`bookcheck.sh`|`book2json_{opac,d-library}.py`と`json2message.py`を組み合わせて起動するbashスクリプト|
+|`bookcheck.sh`|`book2json_{opac,d-library}.py`と`json2message.py`を、Docker環境で起動するbashスクリプト|
 |`book2json_opac.py`|神戸市立図書館で借りている本と予約している本の情報をJSON化するPythonスクリプト|
 |`book2json_d-library.py`|神戸市電子図書館で借りている本と予約している本の情報をJSON化するPythonスクリプト|
 |`json2message.py`|`book2json_{opac,d-library}.py`が出力するJSONを読み込み、返却期限が近い本と取り置き中の予約本の書名をテキスト出力するPythonスクリプト|
@@ -19,7 +19,7 @@
 	$ git clone https://github.com/mah-jp/liblib
 	$ cd liblib
 	```
-3. [envディレクトリ](./blob/main/env/)内の設定ファイル`sample.env`を複製して、`任意の名前.env`を作成します
+3. [envディレクトリ](./env/)内の設定ファイル`sample.env`を複製して、`任意の名前.env`を作成します
 4. `任意の名前.env`をテキストエディタで開き、各種変数を定義します
 5. 次のコマンドを実行します
 	```
