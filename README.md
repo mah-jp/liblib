@@ -1,29 +1,28 @@
 # LibLibとは
 
-- Date: 2024-05-19
+- Date: 2024-05-20
 
 図書館で借りた本の返却忘れと予約本の借り忘れを防ぐための、作者の事情により神戸市立図書館と神戸市電子図書館に特化している、次のスクリプトのセットです。v2.0.0ではDocker環境での動作を前提する作り変えを行い、セットアップが以前より簡単になりました。
 
 |スクリプト名|内容|
 |---|---|
-|`bookcheck.sh`|`book2json_{opac,d-library}.py`と`json2message.py`を、Docker環境で起動するbashスクリプト|
 |`book2json_opac.py`|神戸市立図書館で借りている本と予約している本の情報をJSON化するPythonスクリプト|
 |`book2json_d-library.py`|神戸市電子図書館で借りている本と予約している本の情報をJSON化するPythonスクリプト|
 |`json2message.py`|`book2json_{opac,d-library}.py`が出力するJSONを読み込み、返却期限が近い本と取り置き中の予約本の書名をテキスト出力するPythonスクリプト|
 
 ## セットアップ方法・使い方
 
-1. 動作させるサーバ等にDocker環境を整えます
+1. LibLibを動作させたいサーバ・パソコンにDocker環境を整えます (`docker compose`が使えるようにします)
 2. 本リポジトリをcloneします
 	```
 	$ git clone https://github.com/mah-jp/liblib
 	$ cd liblib
 	```
-3. [envディレクトリ](./env/)内の設定ファイル`sample.env`を複製して、`任意の名前.env`を作成します
-4. `任意の名前.env`をテキストエディタで開き、各種変数を定義します
+3. [envディレクトリ](./env/)内の設定ファイル`sample.env`を複製して、`お好みの名前.env`を作成します
+4. `お好みの名前.env`をテキストエディタで開き、各種変数を定義します
 5. 次のコマンドを実行します
 	```
-	$ FILE_ENV=任意の名前.env ./bookcheck.sh
+	$ FILE_ENV=お好みの名前.env docker compose up
 	```
 6. 設定ファイルの内容に基づいて図書館サイトへアクセスが行われ、借りている本と予約している本の情報がoutputディレクトリ内に保存されます
 
@@ -31,7 +30,7 @@
 
 - スクリプトを改造したり更新した後は、Dockerコンテナの再構築が必要となります。`--build`を付けた次のコマンドを実行してください。
   ```
-  $ FILE_ENV=任意の名前.env ./bookcheck.sh --build
+	$ FILE_ENV=お好みの名前.env docker compose up --build
   ```
 
 ## outputディレクトリ内に保存されるファイル
