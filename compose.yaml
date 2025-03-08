@@ -1,7 +1,7 @@
 services:
   webscraper:
     build: .
-    container_name: ${COMPOSE_PROJECT_NAME}
+    container_name: liblib
     volumes:
       - type: bind
         source: ./env/
