@@ -2,7 +2,7 @@
 
 set -exuo pipefail
 
-# book2json_wrapper.sh (Ver.20240519)
+# book2json_wrapper.sh (Ver.20250309)
 
 # 変数定義 (カスタマイズ部分)
 DIR_ME=$(cd $(dirname $0) && pwd) # スクリプトが存在するディレクトリ
@@ -25,13 +25,19 @@ set -x
 # 変数定義がされてないときのデフォルト値
 FLAG_OPAC=${FLAG_OPAC:-0}
 OPAC_USERNAME=${OPAC_USERNAME:-''}
+set +x
 OPAC_PASSWORD=${OPAC_PASSWORD:-''}
+echo OPAC_PASSWORD="********"
+set -x
 FILE_JSON_OPAC=${FILE_JSON_OPAC:-'opac.json'}
 FILE_TXT_OPAC=${FILE_TXT_OPAC:-'opac.txt'}
 PREFIX_TXT_OPAC=${PREFIX_TXT_OPAC:-'神戸市立図書館の'}
 FLAG_DLIBRARY=${FLAG_DLIBRARY:-0}
 DLIBRARY_USERNAME=${DLIBRARY_USERNAME:-''}
+set +x
 DLIBRARY_PASSWORD=${DLIBRARY_PASSWORD:-''}
+echo DLIBRARY_PASSWORD="********"
+set -x
 FILE_JSON_DLIBRARY=${FILE_JSON_DLIBRARY:-'d-library.json'}
 FILE_TXT_DLIBRARY=${FILE_TXT_DLIBRARY:-'d-library.txt'}
 PREFIX_TXT_DLIBRARY=${PREFIX_TXT_DLIBRARY:-'神戸市電子図書館の'}
