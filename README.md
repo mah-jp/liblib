@@ -1,6 +1,6 @@
 # LibLibとは
 
-- Date: 2024-05-20
+- Date: 2024-05-30
 
 図書館で借りた本の返却忘れと予約本の借り忘れを防ぐための、作者の事情により神戸市立図書館と神戸市電子図書館に特化している、次のスクリプトのセットです。v2.0.0ではDocker環境での動作を前提とした作り変えを行い、セットアップが以前より簡単になりました。
 
@@ -45,7 +45,7 @@
 #### opac.json (神戸市立図書館)
 
 このJSONファイルは`book2json_opac.py`が出力し、神戸市立図書館で借りている本と予約している本の情報を含みます。JSONの構造は次のとおりです。
-```
+```json
 {
   "status": true,
   "url": "https://www.lib.city.kobe.jp/winj/sp/top.do?lang=ja",
@@ -87,7 +87,7 @@
 #### d-library.json (神戸市電子図書館)
 
 このJSONファイルは`book2json_d-library.py.py`が出力し、神戸市電子図書館で借りている本と予約している本の情報を含みます。JSONの構造は次のとおりです。
-```
+```json
 {
   "status": true,
   "url": "https://web.d-library.jp/kobe/g1001/top/",
