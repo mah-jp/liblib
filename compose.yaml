@@ -1,7 +1,7 @@
 services:
   webscraper:
     build: .
-    container_name: liblib
+    container_name: mah-jp_liblib
     volumes:
       - type: bind
         source: ./env/
