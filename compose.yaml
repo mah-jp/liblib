@@ -1,7 +1,6 @@
 services:
-  webscraper:
+  liblib:
     build: .
-    container_name: mah-jp_liblib
     volumes:
       - type: bind
         source: ./env/
@@ -13,5 +12,3 @@ services:
         read_only: false
     environment:
       - FILE_ENV=${FILE_ENV}
-    cap_add:
-      - SYS_ADMIN
