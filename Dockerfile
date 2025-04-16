@@ -3,25 +3,27 @@
 # Docker | Playwright Python > Build your own image
 # https://playwright.dev/python/docs/docker#build-your-own-image
 FROM python:3.12-bookworm
-RUN pip install playwright && \
-	playwright install chromium
+
 # for playwright
 RUN apt-get update && apt-get install -y \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libatspi2.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libnspr4 \
-    libnss3 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxkbcommon0 \
-    libxrandr2
+	libasound2 \
+	libatk-bridge2.0-0 \
+	libatk1.0-0 \
+	libatspi2.0-0 \
+	libcups2 \
+	libdbus-1-3 \
+	libdrm2 \
+	libgbm1 \
+	libnspr4 \
+	libnss3 \
+	libxcomposite1 \
+	libxdamage1 \
+	libxfixes3 \
+	libxkbcommon0 \
+	libxrandr2
+
+RUN pip install playwright && \
+	playwright install chromium
 
 # for etc
 RUN apt-get install -y \
