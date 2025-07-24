@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# book2json_opac.py for 神戸市立図書館 (Ver.20250309)
+# book2json_opac.py for 神戸市立図書館 (Ver.20250725)
 # Usage: LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 from bs4 import BeautifulSoup # pip3 install bs4
@@ -135,7 +135,15 @@ class KobeCityLibraryScraper:
                     count_reserve: int = self.pickup_reserve(date_end_raw) # date_end_rawから無理矢理に取得
                     imgsrc_raw: str = book.find('p', attrs={ 'class': 'title' }).find('img').get('src')
                     url: str = self.make_url(URL_DETAIL, imgsrc_raw)
-                    d: dict = { 'id': i, '書名': title, 'name': title, 'url': url, '貸出日': date_start, '返却予定日': date_end, '予約件数': count_reserve }
+                    d: dict = {
+                        'id': i,
+                        '書名': title,
+                        'name': title,
+                        'url': url,
+                        '貸出日': date_start,
+                        '返却予定日': date_end,
+                        '予約件数': count_reserve,
+                        'count_reserve': count_reserve }
                     if date_end:
                         dt = datetime.datetime.strptime(date_end + ' 00:00:00 JST', '%Y-%m-%d %H:%M:%S %Z')
                         d['date_return'] = dt.isoformat() + '.000000+09:00'
@@ -153,7 +161,15 @@ class KobeCityLibraryScraper:
                     orderstatus: str = self.pickup_orderstatus(orderstatus_raw)
                     imgsrc_raw: str = book.find('p', attrs={ 'class': 'title' }).find('img').get('src')
                     url: str = self.make_url(URL_DETAIL, imgsrc_raw)
-                    d: dict = { 'id': i, '書名': title, 'name': title, 'url': url, '予約日': date_order, '受取館': library, '予約状態': orderstatus, 'ready': False }
+                    d: dict = {
+                        'id': i,
+                        '書名': title,
+                        'name': title,
+                        'url': url,
+                        '予約日': date_order,
+                        '受取館': library,
+                        '予約状態': orderstatus,
+                        'ready': False }
                     if re.match('利用可能', orderstatus): # Ref: https://www.city.kobe.lg.jp/documents/1570/k-lib_help.pdf#page=30
                         d['ready'] = True
                     books.append(d)

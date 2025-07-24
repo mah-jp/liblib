@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# json2message.py (Ver.20250308)
+# json2message.py (Ver.20250725)
 # Usage: cat hoge.json | $0 [PREFIX]
 
 import argparse
@@ -15,6 +15,7 @@ def main(pretext: str = '', hour_deadline: int = 48, use_name_short: bool = Fals
     counter_r: int = 0
     text_b: str = ''
     text_r: str = ''
+    text_e: str = ''
     # 借りている資料のチェック
     if 'borrowing' in data_json:
         if data_json['borrowing']['status'] == True:
@@ -34,11 +35,16 @@ def main(pretext: str = '', hour_deadline: int = 48, use_name_short: bool = Fals
                     elif d_diff == 1:
                         text_d = 'が明後日'
                     else:
-                        text_d = ''
+                        text_d = ('が%d日後' % (d_diff + 1))
+                    if 'count_reserve' in item:
+                        if item['count_reserve'] > 0:
+                            text_e = 'で、延長はできません'
+                        else:
+                            text_e = 'で、延長は可能です'
                     if use_name_short and 'name_short' in item:
-                        text_b = text_b + ('%d冊目、『%s』%s。' % (counter_b, item['name_short'], text_d))
+                        text_b = text_b + ('%d冊目、『%s』%s%s。' % (counter_b, item['name_short'], text_d, text_e))
                     else:
-                        text_b = text_b + ('%d冊目、『%s』%s。' % (counter_b, item['name'], text_d))
+                        text_b = text_b + ('%d冊目、『%s』%s%s。' % (counter_b, item['name'], text_d, text_e))
             if counter_b > 0:
                 text_b = ('%s次の本、%d冊が返却期限です！ ' % (pretext, counter_b)) + text_b
     # 予約している資料のチェック

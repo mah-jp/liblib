@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# book2json_d-library.py for 神戸市電子図書館 (Ver.20250309)
+# book2json_d-library.py for 神戸市電子図書館 (Ver.20250725)
 # Usage: LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 from bs4 import BeautifulSoup # pip3 install bs4
