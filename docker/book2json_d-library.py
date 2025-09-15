@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# book2json_d-library.py for 神戸市電子図書館 (Ver.20250725)
+# book2json_d-library.py for 神戸市電子図書館 (Ver.20250915)
 # Usage: LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 from bs4 import BeautifulSoup # pip3 install bs4
@@ -209,7 +209,7 @@ if __name__ == '__main__':
     try:
         args = sys.argv
         if not(os.environ.get('LIBLIB_USERNAME') and os.environ.get('LIBLIB_PASSWORD')):
-            logging.error('Usage: LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar; {:s}'.format(args[0]))
+            logging.error('Usage: LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar {:s}'.format(args[0]))
             sys.exit(1)
         else:
             username: str = os.environ.get('LIBLIB_USERNAME')
