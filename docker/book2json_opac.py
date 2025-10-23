@@ -250,7 +250,7 @@ if __name__ == '__main__':
     try:
         args = sys.argv
         if not(os.environ.get('LIBLIB_USERNAME') and os.environ.get('LIBLIB_PASSWORD')):
-            logging.error('Usage: LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar; {:s}'.format(args[0]))
+            logging.error('Usage: LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar {:s}'.format(args[0]))
             sys.exit(1)
         else:
             username: str = os.environ.get('LIBLIB_USERNAME')
