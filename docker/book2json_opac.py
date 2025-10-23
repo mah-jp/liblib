@@ -77,6 +77,7 @@ class KobeCityLibraryScraper:
                 page.wait_for_load_state('load', timeout=BROWER_TIMEOUT)
                 page.wait_for_load_state('domcontentloaded', timeout=BROWER_TIMEOUT)
                 expect(page).to_have_title(re.compile('貸出状況一覧'))
+                page.wait_for_timeout(1000) # 1秒待機 (暫定策)
                 soup = BeautifulSoup(page.content(), 'html.parser')
                 soup_books = soup.find('ul', attrs={ 'class': 'listBookBa-2 function' }).find_all('li')
                 books_borrowing.update({ 'status': True, 'items': self.parse_html(soup_books, 'borrowing') })
