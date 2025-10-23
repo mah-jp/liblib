@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# json2message.py (Ver.20250909)
+# json2message.py (Ver.20251023)
 # Usage: cat hoge.json | $0 [PREFIX]
 
 import argparse
@@ -36,8 +36,9 @@ def main(pretext: str = '', hour_deadline: int = 48, use_name_short: bool = Fals
                         text_d = 'が明後日'
                     else:
                         text_d = ('が%d日後' % (d_diff + 1))
-                    if 'count_reserve' in item:
-                        if (item['count_reserve'] > 0) or (item['flag_extended'] == True):
+                    # 延長可否を判定する (OPACの場合)
+                    if 'flag_extended' in item and 'flag_reserved' in item:
+                        if item['flag_extended'] or item['flag_reserved']:
                             text_e = 'で、延長はできません'
                         else:
                             text_e = 'で、延長は可能です'

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# book2json_opac.py for 神戸市立図書館 (Ver.20250909)
+# book2json_opac.py for 神戸市立図書館 (Ver.20251024)
 # Usage: LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 from bs4 import BeautifulSoup # pip3 install bs4
@@ -136,17 +136,16 @@ class KobeCityLibraryScraper:
                     imgsrc_raw: str = book.find('p', attrs={ 'class': 'title' }).find('img').get('src')
                     url: str = self.make_url(URL_DETAIL, imgsrc_raw)
                     flag_extended: bool = self.pickup_extended(book)
+                    flag_reserved: bool = self.pickup_reserved(book)
                     d: dict = {
                         'id': i,
-                        '書名': title,
                         'name': title,
                         'url': url,
                         '貸出日': date_start,
                         '返却予定日': date_end,
                         '予約件数': count_reserve,
-                        'count_reserve': count_reserve,
-                        '延長済': flag_extended,
-                        'flag_extended': flag_extended }
+                        'flag_extended': flag_extended,
+                        'flag_reserved': flag_reserved }
                     if date_end:
                         dt = datetime.datetime.strptime(date_end + ' 00:00:00 JST', '%Y-%m-%d %H:%M:%S %Z')
                         d['date_return'] = dt.isoformat() + '.000000+09:00'
@@ -166,7 +165,6 @@ class KobeCityLibraryScraper:
                     url: str = self.make_url(URL_DETAIL, imgsrc_raw)
                     d: dict = {
                         'id': i,
-                        '書名': title,
                         'name': title,
                         'url': url,
                         '予約日': date_order,
@@ -224,7 +222,16 @@ class KobeCityLibraryScraper:
     def pickup_extended(self, book) -> bool:
         if book.find('li'):
             for li in book.find_all('li'):
-                if re.match('延長済', li.find('em', attrs={ 'class': 'icon2 extend' }).text):
+                tag_em = li.find('em', attrs={ 'class': 'icon2 extend' })
+                if tag_em and re.match('延長済', tag_em.text):
+                    return True
+        return False
+
+    def pickup_reserved(self, book) -> bool:
+        if book.find('li'):
+            for li in book.find_all('li'):
+                tag_em = li.find('em', attrs={ 'class': 'icon2 reserveExist' })
+                if tag_em and re.match('予約有', tag_em.text):
                     return True
         return False
 
