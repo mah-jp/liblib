@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# book2json_d-library.py for 神戸市電子図書館 (Ver.20250725)
+# book2json_d-library.py for 神戸市電子図書館 (Ver.20251024)
 # Usage: LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 from bs4 import BeautifulSoup # pip3 install bs4
@@ -111,7 +111,7 @@ class DLibraryScraper:
                     date_end: str = self.pickup_date(date_end_raw, 'borrowing')
                     url_raw: str = book.find_all('dd')[0].find('a').get('href')
                     url: str = self.make_url(url_raw)
-                    d: dict = { 'id': i, '書名': title, 'name': title, 'url': url, '利用期限日': date_end }
+                    d: dict = { 'id': i, 'name': title, 'url': url, '利用期限日': date_end }
                     if date_end:
                         dt = datetime.datetime.strptime(date_end + ' 00:00:00 JST', '%Y-%m-%d %H:%M:%S %Z')
                         d['date_return'] = dt.isoformat() + '.000000+09:00'
@@ -131,7 +131,7 @@ class DLibraryScraper:
                     url_raw: str = book.find_all('dd')[2].find('a').get('href')
                     logger.debug('{:s} url_raw={}'.format(mode, self.cut_space(url_raw)))
                     url: str = self.make_url(url_raw)
-                    d: dict = { 'id': i, '書名': title, 'name': title, 'url': url, '予約日': date_order, '予約状態': orderstatus, 'ready': False }
+                    d: dict = { 'id': i, 'name': title, 'url': url, '予約日': date_order, '予約状態': orderstatus, 'ready': False }
                     books.append(d)
                 elif book.find_all('dt')[1].text == '取り置き資料名': # 資料のタイトルがあったら
                     title_raw: str = book.find_all('dd')[1].find('a').text
@@ -146,7 +146,7 @@ class DLibraryScraper:
                     url_raw: str = book.find_all('dd')[1].find('a').get('href')
                     logger.debug('{:s} url_raw={}'.format(mode, self.cut_space(url_raw)))
                     url: str = self.make_url(url_raw)
-                    d: dict = { 'id': i, '書名': title, 'name': title, 'url': url, '取り置き期限': date_order, '予約状態': orderstatus, 'ready': True }
+                    d: dict = { 'id': i, 'name': title, 'url': url, '取り置き期限': date_order, '予約状態': orderstatus, 'ready': True }
                     books.append(d)
                 i += 1
         return books
