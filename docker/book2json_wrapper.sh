@@ -43,33 +43,39 @@ export LOGGING_DEBUG=${LOGGING_DEBUG:-0}
 
 # FILE_TARGETが存在したら.bakにmvし、FILE_TARGETを600で新規作成する
 function prepare_file () {
-	FILE_TARGET=$1
+	local FILE_TARGET=$1
 	if [ -e "${FILE_TARGET}" ]; then
 		mv "${FILE_TARGET}" "${FILE_TARGET}.bak"
 	fi
-	install -m 600 /dev/null "${FILE_TARGET}"
+	touch "${FILE_TARGET}"
+	chmod 600 "${FILE_TARGET}"
+}
+
+# 図書館ごとの処理をまとめた関数
+function process_library() {
+	local cmd=$1
+	local username=$2
+	local password=$3
+	local file_json=$4
+	local file_txt=$5
+	local prefix_txt=$6
+
+	prepare_file "${DIR_OUTPUT}/${file_json}"
+	echo "exec: ${cmd}"
+	set +x
+	LIBLIB_USERNAME=${username} LIBLIB_PASSWORD=${password} \
+	"${cmd}" > "${DIR_OUTPUT}/${file_json}"
+	set -x
+	prepare_file "${DIR_OUTPUT}/${file_txt}"
+	cat "${DIR_OUTPUT}/${file_json}" | "${CMD_JSON2MESSAGE}" "${prefix_txt}" > "${DIR_OUTPUT}/${file_txt}"
 }
 
 # OPAC (神戸市立図書館)
 if [ $FLAG_OPAC -eq 1 ]; then
-	prepare_file "${DIR_OUTPUT}/${FILE_JSON_OPAC}"
-	echo "exec: ${CMD_OPAC}"
-	set +x
-	LIBLIB_USERNAME=${OPAC_USERNAME} LIBLIB_PASSWORD=${OPAC_PASSWORD} \
-	"${CMD_OPAC}" > "${DIR_OUTPUT}/${FILE_JSON_OPAC}"
-	set -x
-	prepare_file "${DIR_OUTPUT}/${FILE_TXT_OPAC}"
-	cat "${DIR_OUTPUT}/${FILE_JSON_OPAC}" | "${CMD_JSON2MESSAGE}" "${PREFIX_TXT_OPAC}" > "${DIR_OUTPUT}/${FILE_TXT_OPAC}"
+	process_library "${CMD_OPAC}" "${OPAC_USERNAME}" "${OPAC_PASSWORD}" "${FILE_JSON_OPAC}" "${FILE_TXT_OPAC}" "${PREFIX_TXT_OPAC}"
 fi
 
 # DLIBRARY (神戸市電子図書館)
 if [ $FLAG_DLIBRARY -eq 1 ]; then
-	prepare_file "${DIR_OUTPUT}/${FILE_JSON_DLIBRARY}"
-	echo "exec: ${CMD_DLIBRARY}"
-	set +x
-	LIBLIB_USERNAME=${DLIBRARY_USERNAME} LIBLIB_PASSWORD=${DLIBRARY_PASSWORD} \
-	"${CMD_DLIBRARY}" > "${DIR_OUTPUT}/${FILE_JSON_DLIBRARY}"
-	set -x
-	prepare_file "${DIR_OUTPUT}/${FILE_TXT_DLIBRARY}"
-	cat "${DIR_OUTPUT}/${FILE_JSON_DLIBRARY}" | "${CMD_JSON2MESSAGE}" "${PREFIX_TXT_DLIBRARY}" > "${DIR_OUTPUT}/${FILE_TXT_DLIBRARY}"
+	process_library "${CMD_DLIBRARY}" "${DLIBRARY_USERNAME}" "${DLIBRARY_PASSWORD}" "${FILE_JSON_DLIBRARY}" "${FILE_TXT_DLIBRARY}" "${PREFIX_TXT_DLIBRARY}"
 fi
