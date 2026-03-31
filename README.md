@@ -1,6 +1,6 @@
 # LibLibとは
 
-- Date: 2025-10-24
+- Date: 2026-03-31
 
 図書館で借りた本の返却忘れと予約本の借り忘れを防ぐための、作者の事情により神戸市立図書館と神戸市電子図書館に特化している、次のスクリプトのセットです。v2.0.0ではDocker環境での動作を前提とした作り変えを行い、セットアップが以前より簡単になりました。
 
@@ -9,11 +9,11 @@
 |`book2json_opac.py`|神戸市立図書館にログインし、貸出・予約状況をスクレイピングしてJSON形式で出力します。|
 |`book2json_d-library.py`|神戸市電子図書館にログインし、貸出・予約状況をスクレイピングしてJSON形式で出力します。|
 |`json2message.py`|上記スクリプトが出力したJSONを標準入力から受け取り、通知が必要な書籍情報 (返却期限が近い、予約本が準備完了など) を人間が読みやすいテキスト形式で出力します。<br>引数で、メッセージの接頭辞 (`pretext`)、通知対象とする返却期限までの時間 (`--hour_deadline`)、短い書籍名を利用するか (`--use_name_short`) を指定できます。|
-|`book2json_wrapper.sh`|設定ファイル (`env/*.env`) に基づいて上記スクリプト群を実行し、結果を`output`ディレクトリに保存するラッパーシェルスクリプトです。|
+|`book2json_wrapper.sh`|設定ファイル (`env/*.env`) に基づいて上記スクリプト群を実行し、結果を`output`ディレクトリに保存するラッパーシェルスクリプトです。実行ログは標準エラー出力に出力されます。|
 
 ## セットアップ方法・使い方
 
-1. LibLibを動作させたいサーバ・パソコンにDocker環境を整えます (`docker compose`が使えるようにします)
+1. LibLibを動作させたいサーバ・パソコンにDockerまたはPodman環境を整えます (`docker compose` または `podman-compose` が使えるようにします)
 2. 本リポジトリをcloneします
 	```
 	$ git clone https://github.com/mah-jp/liblib
@@ -31,17 +31,26 @@
    - `PREFIX_TXT_DLIBRARY="..."`: `json2message.py`で生成するメッセージの接頭辞 (例: `神戸市電子図書館の`)。
    - `LOGGING_DEBUG=1`: デバッグログを有効にする場合に`1`を設定します。
 5. 次のコマンドを実行します
-	```
+	```bash
+	# Dockerの場合
 	$ FILE_ENV=お好みの名前.env docker compose up
+	
+	# Podmanの場合
+	$ FILE_ENV=お好みの名前.env podman-compose up
 	```
 6. 設定ファイルの内容に基づいて図書館サイトへアクセスが行われ、借りている本と予約している本の情報がoutputディレクトリ内に保存されます
 
 ### 注意事項
 
 - スクリプトを改造したり更新した後は、Dockerコンテナの再構築が必要となります。次のコマンドを実行してください。
-  ```
+  ```bash
+  # Dockerの場合
   $ docker compose down
-	$ FILE_ENV=お好みの名前.env docker compose up --build
+  $ FILE_ENV=お好みの名前.env docker compose up --build
+
+  # Podmanの場合
+  $ podman-compose down
+  $ FILE_ENV=お好みの名前.env podman-compose up --build
   ```
 
 ## outputディレクトリ内に保存されるファイル

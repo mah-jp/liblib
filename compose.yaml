@@ -1,6 +1,7 @@
 services:
   liblib:
     build: .
+    pull_policy: build
     volumes:
       - type: bind
         source: ./env/

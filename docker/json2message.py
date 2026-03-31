@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# json2message.py (Ver.20251023)
+# json2message.py (Ver.20260331)
 # Usage: cat hoge.json | $0 [PREFIX]
 
 import argparse
@@ -10,7 +10,7 @@ import sys
 
 def main(pretext: str = '', hour_deadline: int = 48, use_name_short: bool = False) -> tuple[int, str]:
     data_json: dict = json.loads(sys.stdin.read())
-    d_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+    d_now = datetime.datetime.now().astimezone()
     counter_b: int = 0
     counter_r: int = 0
     text_b: str = ''

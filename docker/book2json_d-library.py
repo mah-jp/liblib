@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
-# book2json_d-library.py for 神戸市電子図書館 (Ver.20251024)
+# book2json_d-library.py for 神戸市電子図書館 (Ver.20260331)
 # Usage: LIBLIB_USERNAME=foo LIBLIB_PASSWORD=bar $0
 
 from bs4 import BeautifulSoup # pip3 install bs4
-from playwright.sync_api import Playwright, sync_playwright, expect # pip install playwright
-from playwright_stealth import stealth_sync # reCAPTCHA対策 Ref: https://pypi.org/project/playwright-stealth/
+from patchright.sync_api import Playwright, sync_playwright, expect # pip install patchright
 import datetime
 import json
 import logging
@@ -82,7 +81,6 @@ class DLibraryScraper:
         browser = playwright.chromium.launch(headless=True)
         context = browser.new_context()
         page = context.new_page()
-        stealth_sync(page)
 
         # DLibraryScraperのインスタンスを作成
         scraper = DLibraryScraper(URL_START, URL_DETAIL)
@@ -113,8 +111,8 @@ class DLibraryScraper:
                     url: str = self.make_url(url_raw)
                     d: dict = { 'id': i, 'name': title, 'url': url, '利用期限日': date_end }
                     if date_end:
-                        dt = datetime.datetime.strptime(date_end + ' 00:00:00 JST', '%Y-%m-%d %H:%M:%S %Z')
-                        d['date_return'] = dt.isoformat() + '.000000+09:00'
+                        dt = datetime.datetime.strptime(date_end + ' 00:00:00', '%Y-%m-%d %H:%M:%S').astimezone()
+                        d['date_return'] = dt.isoformat()
                     books.append(d)
             elif mode == 'reservation':
                 # 予約している資料
@@ -152,7 +150,7 @@ class DLibraryScraper:
         return books
 
     def get_datetime(self) -> str:
-        return datetime.datetime.now().isoformat() + '+09:00'
+        return datetime.datetime.now().astimezone().isoformat()
 
     def cut_space(self, s: str) -> str:
         s = s.strip()
